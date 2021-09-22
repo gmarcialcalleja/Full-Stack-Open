@@ -1,79 +1,49 @@
 import React, { useState } from 'react'
 
-const History = (props) => {
-  if (props.allClicks.length === 0 ) {
-    return (
-      <div>Press the damn button idiot</div>
-    )
-  }
+const Statistics = (props) => {
   return (
-    <div>
-      button press history: {props.allClicks.join(' ')}
-    </div>
+    <div>{props.text} {props.feedbackNumber}</div>
   )
 }
 
 const Button = (props) => {
   return (
-    <button onClick={props.handleClicks}>
-      {props.text}
-    </button>
+    <button onClick={ props.feedback }> {props.text} </button>
   )
 }
 
 const App = () => {
-  const [left, setLeft] = useState(0)
-  const [right, setRight] = useState(0)
-  const [allClicks, setAll] = useState([]);
+  // save clicks of each button to its own state
+  const [good, setGood] = useState(0)
+  const [neutral, setNeutral] = useState(0)
+  const [bad, setBad] = useState(0)
 
-  const handleClicks = {
-    plus: {
-      left: () => {
-        setAll(allClicks.concat('L'));
-        setLeft(left + 1);
-      },
-      right: () => {
-        setAll(allClicks.concat('R'));
-        setRight(right + 1);
-      }
-    },
-
-    minus: {
-      left: () => {
-        setAll(allClicks.concat('-L'));
-        setLeft(left - 1);
-      },
-      right: () => {
-        setAll(allClicks.concat('-R'));
-        setRight(right - 1);
+  const feedback = (type) => {
+    return () => {
+      if (type === 'good') {
+        setGood(good + 1);
+      } else if (type === 'neutral') {
+        setNeutral(neutral + 1);
+      } else if (type === 'bad') {
+        setBad(bad + 1);
+      } else {
+        console.log(type)
       }
     }
-
-  }/*
-  const handleLeftClick = () => {
-    setAll(allClicks.concat('L'));
-    setLeft(left + 1);
   }
-  const handleRightClick = () => {
-    setAll(allClicks.concat('R'));
-    setRight(right + 1);
-  }*/
 
   return (
     <div>
-      {left}{/*
-      <button onClick={handleClicks.plus.left}>left</button>
-      <button onClick={handleClicks.plus.right}>right</button>*/}
-      <Button 
-      handleClicks={handleClicks.plus.left}
-      text="left"
-      />
-      <Button
-      handleClicks={handleClicks.plus.right}
-      text="right"
-      />
-      {right}
-      <History allClicks={allClicks}/>
+      <h1>Give Feedback</h1>
+      <Button feedback={feedback('good')} text={'good'} />
+      <Button feedback={feedback('neutral')} text={'neutral'} />
+      <Button feedback={feedback('bad')} text={'bad'} />
+
+      <h1>Statistics</h1>
+      <Statistics text="good"  feedbackNumber={good} />
+      <Statistics text="neutral"  feedbackNumber={neutral} />
+      <Statistics text="bad"  feedbackNumber={bad} />
+
     </div>
   )
 }
