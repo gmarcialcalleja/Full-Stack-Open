@@ -1,81 +1,92 @@
-import React, { useState } from 'react'
-
-const History = (props) => {
-  if (props.allClicks.length === 0 ) {
-    return (
-      <div>Press the damn button idiot</div>
-    )
-  }
-  return (
-    <div>
-      button press history: {props.allClicks.join(' ')}
-    </div>
-  )
-}
-
-const Button = (props) => {
-  return (
-    <button onClick={props.handleClicks}>
-      {props.text}
-    </button>
-  )
-}
+import React, { useState, useEffect } from 'react';
+import Note from "./components/Note.js";
+import noteService from "./services/notes.js";
 
 const App = () => {
-  const [left, setLeft] = useState(0)
-  const [right, setRight] = useState(0)
-  const [allClicks, setAll] = useState([]);
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(false)
 
-  const handleClicks = {
-    plus: {
-      left: () => {
-        setAll(allClicks.concat('L'));
-        setLeft(left + 1);
-      },
-      right: () => {
-        setAll(allClicks.concat('R'));
-        setRight(right + 1);
+  useEffect(() => {
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
+    })
+  }, [] )
+      
+    const addNote = (event) => {
+      event.preventDefault()
+      const noteObject = {
+        content: newNote,
+        date: new Date().toISOString(),
+        important: Math.random() > 0.5,
+        id: notes.length + 1,
       }
-    },
 
-    minus: {
-      left: () => {
-        setAll(allClicks.concat('-L'));
-        setLeft(left - 1);
-      },
-      right: () => {
-        setAll(allClicks.concat('-R'));
-        setRight(right - 1);
-      }
+      noteService
+        .create(noteObject)
+        .then(returnedNote => {
+          setNotes(notes.concat(returnedNote))
+          setNewNote('')
+      })
     }
 
-  }/*
-  const handleLeftClick = () => {
-    setAll(allClicks.concat('L'));
-    setLeft(left + 1);
-  }
-  const handleRightClick = () => {
-    setAll(allClicks.concat('R'));
-    setRight(right + 1);
-  }*/
+    const toggleImportanceOf = (id) => {
+      const note = notes.find(n => n.id === id)
+      const changedNote = { ...note, important: !note.important}
+ 
+      noteService
+        .update(id, changedNote)
+        .then(returnedNote => {
+           setNotes(notes.map(note => note.id !== id ? note: returnedNote))
+        })
+        .catch( error => {
+          alert(
+            `the message ${note.content} was already deleted from the server`
+          )
 
-  return (
-    <div>
-      {left}{/*
-      <button onClick={handleClicks.plus.left}>left</button>
-      <button onClick={handleClicks.plus.right}>right</button>*/}
-      <Button 
-      handleClicks={handleClicks.plus.left}
-      text="left"
-      />
-      <Button
-      handleClicks={handleClicks.plus.right}
-      text="right"
-      />
-      {right}
-      <History allClicks={allClicks}/>
-    </div>
-  )
-}
+          setNotes(notes.filter(n => n.id !== id))
+
+        })
+    }  
+
+    const handleNoteChange = (event) => {
+      setNewNote(event.target.value)
+    }
+    
+    const notesToShow = showAll
+    ? notes
+    : notes.filter(note => note.important)
+
+    return (
+      <div>
+        <h1>Notes</h1>
+        <div>
+          <button onClick={() => setShowAll(!showAll)}>
+            show {showAll ? 'important' : 'all' }
+          </button>
+        </div>   
+        <ul>
+          {notesToShow.map((note,i) => 
+              <Note 
+              key={i} 
+              note={note} 
+              toggleImportance={() => {toggleImportanceOf(note.id)}}
+              />
+          )}
+        </ul>
+        <form onSubmit={addNote}>
+          <input
+            value={newNote}
+            onChange={handleNoteChange}
+          />
+          <button type="submit">save</button>
+        </form>  
+      </div>
+    )
+  }
+  
+
 
 export default App
