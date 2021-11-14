@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import Note from "./components/Note.js";
 import noteService from "./services/notes.js";
@@ -88,5 +89,56 @@ const App = () => {
   }
   
 
+=======
+import React, { useState } from 'react'
+
+const Statistics = (props) => {
+  return (
+    <div>{props.text} {props.feedbackNumber}</div>
+  )
+}
+
+const Button = (props) => {
+  return (
+    <button onClick={ props.feedback }> {props.text} </button>
+  )
+}
+
+const App = () => {
+  // save clicks of each button to its own state
+  const [good, setGood] = useState(0)
+  const [neutral, setNeutral] = useState(0)
+  const [bad, setBad] = useState(0)
+
+  const feedback = (type) => {
+    return () => {
+      if (type === 'good') {
+        setGood(good + 1);
+      } else if (type === 'neutral') {
+        setNeutral(neutral + 1);
+      } else if (type === 'bad') {
+        setBad(bad + 1);
+      } else {
+        console.log(type)
+      }
+    }
+  }
+
+  return (
+    <div>
+      <h1>Give Feedback</h1>
+      <Button feedback={feedback('good')} text={'good'} />
+      <Button feedback={feedback('neutral')} text={'neutral'} />
+      <Button feedback={feedback('bad')} text={'bad'} />
+
+      <h1>Statistics</h1>
+      <Statistics text="good"  feedbackNumber={good} />
+      <Statistics text="neutral"  feedbackNumber={neutral} />
+      <Statistics text="bad"  feedbackNumber={bad} />
+
+    </div>
+  )
+}
+>>>>>>> 171b13718008038c4985f8565e1aeb29255ab148
 
 export default App
